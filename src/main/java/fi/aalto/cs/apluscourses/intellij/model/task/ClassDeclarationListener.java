@@ -92,26 +92,28 @@ public class ClassDeclarationListener implements ActivitiesListener, DocumentLis
   }
 
   private void checkPsiFile(PsiFile psiFile) {
-    psiFile.accept(new ScalaRecursiveElementVisitor() {
-      @Override
-      public void visitScalaElement(ScalaPsiElement element) {
-        super.visitScalaElement(element);
-        if ((element instanceof ScClass && checkScClass((ScClass) element))) {
-          PsiElement[] children = element.getChildren();
-          Optional<PsiElement> constructor = Arrays.stream(children).filter(
-              child -> child instanceof ScPrimaryConstructor).findFirst();
-          if (constructor.isPresent()
-                  && checkScPrimaryConstructor((ScPrimaryConstructor) constructor.get())) {
-            Optional<PsiElement> extendsBlock = Arrays.stream(children).filter(
-                child -> child instanceof ScExtendsBlockImpl).findFirst();
-            if (extendsBlock.isPresent()
-                    && checkExtendsBlock((ScExtendsBlockImpl) extendsBlock.get())) {
-              ApplicationManager.getApplication().invokeLater(callback::callback);
+    if (psiFile != null) {
+      psiFile.accept(new ScalaRecursiveElementVisitor() {
+        @Override
+        public void visitScalaElement(ScalaPsiElement element) {
+          super.visitScalaElement(element);
+          if ((element instanceof ScClass && checkScClass((ScClass) element))) {
+            PsiElement[] children = element.getChildren();
+            Optional<PsiElement> constructor = Arrays.stream(children).filter(
+                ScPrimaryConstructor.class::isInstance).findFirst();
+            if (constructor.isPresent()
+                    && checkScPrimaryConstructor((ScPrimaryConstructor) constructor.get())) {
+              Optional<PsiElement> extendsBlock = Arrays.stream(children).filter(
+                  ScExtendsBlockImpl.class::isInstance).findFirst();
+              if (extendsBlock.isPresent()
+                      && checkExtendsBlock((ScExtendsBlockImpl) extendsBlock.get())) {
+                ApplicationManager.getApplication().invokeLater(callback::callback);
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   private boolean checkScClass(ScClass element) {
@@ -141,7 +143,7 @@ public class ClassDeclarationListener implements ActivitiesListener, DocumentLis
     List<String> hierarchies = new ArrayList<>();
     PsiElement[] children = element.getChildren();
     Optional<PsiElement> extendsElement = Arrays.stream(children).filter(
-        child -> child instanceof ScTemplateParentsImpl).findFirst();
+        ScTemplateParentsImpl.class::isInstance).findFirst();
     // Peculirarity: If 'extends' is written without specifying a class name
     // it is considered correct by Scala
     // (the keyword extends is not visible when traversing the Psi tree)

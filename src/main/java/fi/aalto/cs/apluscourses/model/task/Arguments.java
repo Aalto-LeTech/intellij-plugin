@@ -18,7 +18,7 @@ public interface Arguments {
    * @return The (non-null) value of the argument.
    */
   default @NotNull String getOrThrow(@NotNull String key) {
-    if (! (get(key) instanceof String)) {
+    if (!(get(key) instanceof String)) {
       throw new IllegalArgumentException("Argument is not a String: " + key);
     }
     String value = (String) get(key);

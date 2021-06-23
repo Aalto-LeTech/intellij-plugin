@@ -10,5 +10,7 @@ public interface ActivityFactory {
   @NotNull ComponentPresenter createPresenter(@NotNull String component,
                                               @NotNull String instruction,
                                               @NotNull String info,
-                                              @NotNull Arguments arguments);
+                                              @NotNull Arguments componentArguments,
+                                              @NotNull Arguments actionArguments,
+                                              String @NotNull [] assertClosed);
 }

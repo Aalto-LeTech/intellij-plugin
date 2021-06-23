@@ -53,12 +53,9 @@ public class IdeActionListener implements AnActionListener, ActivitiesListener {
   @Override
   public void beforeActionPerformed(@NotNull AnAction action, @NotNull DataContext dataContext,
                                     @NotNull AnActionEvent event) {
-
-    System.out.println("Action: " + action.getTemplateText()
-            + " ActionEvent: " + event.getPlace());
     //perhaps create subclasses?
     boolean complete = true;
-    if (filePath != null) {
+    if (filePath != null && !filePath.isEmpty()) {
       this.filePath = project.getBasePath() + filePath;
       VirtualFile file = event.getDataContext().getData(PlatformDataKeys.VIRTUAL_FILE);
       complete = file != null && filePath.equals(file.getPath());

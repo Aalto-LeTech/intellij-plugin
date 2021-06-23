@@ -19,6 +19,7 @@ public class TutorialViewModel {
   private Task currentTask = null;
 
   private int currentTaskIndex;
+  private int unlockedIndex;
 
   private final int tasksAmount;
 
@@ -35,6 +36,7 @@ public class TutorialViewModel {
       this.currentTask = tasks.get(0);
     }
     currentTaskIndex = 0;
+    unlockedIndex = 0;
     tasksAmount = tasks.size();
     this.activityFactory = activityFactory;
   }
@@ -82,6 +84,25 @@ public class TutorialViewModel {
   }
 
   /**
+   * Sets the currentTask as completed and frees up any resources associated with it.
+   * CurrentTask is set to the task with the given index.
+   */
+  public void changeTask(int newTaskIndex) {
+    synchronized (lock) {
+      Tutorial tutorial = tutorialExercise.getTutorial();
+      currentTask.endTask();
+      currentTask.taskCompleted.removeCallback(this);
+      currentTask = tutorial.getTasks().get(newTaskIndex);
+      this.currentTaskIndex = newTaskIndex;
+      if (currentTask == null) {
+        tutorial.onComplete();
+      } else {
+        startNextTask();
+      }
+    }
+  }
+
+  /**
    * Functionality for canceling the Tutorial, mainly frees up resources.
    */
   public void cancelTutorial() {
@@ -111,15 +132,23 @@ public class TutorialViewModel {
 
   private void incrementIndex() {
     currentTaskIndex++;
+    unlockedIndex = Math.max(currentTaskIndex, unlockedIndex);
   }
 
   public int getTasksAmount() {
     return tasksAmount;
   }
 
+  /**
+   * Cancels the tutorial after the user confirms it.
+   */
   public void confirmCancel() {
     if (dialogs.confirmCancel(this)) {
       cancelTutorial();
     }
+  }
+
+  public int getUnlockedIndex() {
+    return unlockedIndex;
   }
 }

@@ -21,7 +21,6 @@ import fi.aalto.cs.apluscourses.model.task.ActivitiesListener;
 import fi.aalto.cs.apluscourses.model.task.ListenerCallback;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -105,7 +104,7 @@ public class FunctionDefinitionListener implements ActivitiesListener,
                 && methodName.equals(((ScFunctionDefinition) element).getName())) {
           PsiElement[] children = element.getChildren();
           Optional<PsiElement> opt = Arrays.stream(children).filter(
-              c -> c instanceof ScParametersImpl).findFirst();
+              ScParametersImpl.class::isInstance).findFirst();
           if (opt.isPresent() && checkParameters(((ScParametersImpl) opt.get()).getParameters())) {
             PsiElement methodBodyParent = children[children.length - 1];
             if (methodBodyParent != null) {

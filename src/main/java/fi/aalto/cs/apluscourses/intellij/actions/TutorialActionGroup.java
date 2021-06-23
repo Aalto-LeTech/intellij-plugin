@@ -80,14 +80,18 @@ public class TutorialActionGroup extends DefaultActionGroup implements DumbAware
 
     @Override
     public void setSelected(@NotNull AnActionEvent e, boolean state) {
-      //TODO change current task
+      var tutorial = mainViewModelProvider.getMainViewModel(e.getProject())
+          .tutorialViewModel.get();
+      if (tutorial != null && state) {
+        tutorial.changeTask(index - 1);
+      }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
       var tutorial = mainViewModelProvider.getMainViewModel(e.getProject()).tutorialViewModel.get();
       if (tutorial != null) {
-        e.getPresentation().setEnabled(tutorial.getCurrentTaskIndex() >= index);
+        e.getPresentation().setEnabled(tutorial.getUnlockedIndex() >= index);
       }
       super.update(e);
     }

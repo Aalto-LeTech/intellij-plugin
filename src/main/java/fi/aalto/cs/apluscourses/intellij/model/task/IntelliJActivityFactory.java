@@ -6,6 +6,7 @@ import fi.aalto.cs.apluscourses.model.task.ActivityFactory;
 import fi.aalto.cs.apluscourses.model.task.Arguments;
 import fi.aalto.cs.apluscourses.model.task.ComponentPresenter;
 import fi.aalto.cs.apluscourses.model.task.ListenerCallback;
+import fi.aalto.cs.apluscourses.ui.ideactivities.ComponentDatabase;
 import org.jetbrains.annotations.NotNull;
 
 public class IntelliJActivityFactory implements ActivityFactory {
@@ -48,12 +49,30 @@ public class IntelliJActivityFactory implements ActivityFactory {
   public @NotNull ComponentPresenter createPresenter(@NotNull String component,
                                                      @NotNull String instruction,
                                                      @NotNull String info,
-                                                     @NotNull Arguments arguments) {
+                                                     @NotNull Arguments componentArguments,
+                                                     @NotNull Arguments actionArguments,
+                                                     String @NotNull [] assertClosed) {
+    for (var closedComponent : assertClosed) {
+      switch (closedComponent.split("\\|")[0]) {
+        case "projectTree":
+          ComponentDatabase.hideProjectToolWindow(project);
+          break;
+        case "aPlusCourses":
+          ComponentDatabase.hideAPlusToolWindow(project);
+          break;
+        case "editor":
+          ComponentDatabase.closeFile(closedComponent.replaceFirst("editor\\|", ""), project);
+          break;
+        default:
+          throw new IllegalArgumentException("Unsupported component: " + component);
+      }
+    }
     switch (component) {
       case "projectTree":
-        return new ProjectTreePresenter(instruction, info);
+        return new ProjectTreePresenter(instruction, info, project);
       case "editor":
-        return new EditorPresenter(instruction, info);
+        return new EditorPresenter(instruction, info, actionArguments.getOrThrow(FILE_PATH),
+            project);
       default:
         throw new IllegalArgumentException("Unsupported component: " + component);
     }
