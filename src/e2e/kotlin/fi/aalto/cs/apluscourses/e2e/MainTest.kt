@@ -62,7 +62,6 @@ class MainTest {
                         "O1Library not found in project view tree"
                     ) { hasText("O1Library") }
                 }
-                aPlusSideBarButton().click()
                 with(modules()) {
                     waitFor(
                         Duration.ofSeconds(60),

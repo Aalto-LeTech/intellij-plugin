@@ -1,13 +1,17 @@
 package fi.aalto.cs.apluscourses.model.task;
 
+import com.intellij.openapi.application.ApplicationManager;
 import fi.aalto.cs.apluscourses.utils.Event;
 import fi.aalto.cs.apluscourses.utils.JsonUtil;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 public class Task {
+  public static final int REFRESH_INTERVAL = 1000;
   public final @NotNull Event taskCompleted = new Event();
 
   private final @NotNull String instruction;
@@ -16,6 +20,7 @@ public class Task {
   private final @NotNull Arguments componentArguments;
   private final @NotNull String action;
   private final @NotNull Arguments actionArguments;
+  private Timer timer;
 
   private ActivitiesListener listener;
   private ComponentPresenter presenter;
@@ -45,6 +50,7 @@ public class Task {
    * Ends the task.
    */
   public synchronized void endTask() {
+    timer.cancel();
     if (listener != null) {
       listener.unregisterListener();
       listener = null;
@@ -65,7 +71,10 @@ public class Task {
     if (presenter != null || listener != null) {
       throw new IllegalStateException();
     }
-    presenter = activityFactory.createPresenter(component, instruction, info, componentArguments);
+    presenter = activityFactory.createPresenter(component, instruction, info, componentArguments,
+        actionArguments);
+    this.timer = new Timer();
+    startTimer();
     listener = activityFactory.createListener(action, actionArguments, taskCompleted::trigger);
     if (listener.registerListener()) {
       return true;
@@ -95,6 +104,25 @@ public class Task {
     return jsonObject == null ? Arguments.empty()
         : JsonUtil.parseObject(jsonObject, JSONObject::get,
             Function.identity(), Function.identity())::get;
+  }
+
+  private void startTimer() {
+    timer.scheduleAtFixedRate(new TaskRefresher(), REFRESH_INTERVAL, REFRESH_INTERVAL);
+  }
+
+  private class TaskRefresher extends TimerTask {
+
+    @Override
+    public void run() {
+      ApplicationManager.getApplication().invokeLater(() -> {
+        if (presenter == null) {
+          return;
+        }
+        if (!presenter.isVisible()) {
+          presenter.highlight();
+        }
+      });
+    }
   }
 }
 

@@ -5,4 +5,6 @@ public interface ComponentPresenter {
   void highlight();
 
   void removeHighlight();
+
+  boolean isVisible();
 }
