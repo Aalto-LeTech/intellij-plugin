@@ -202,7 +202,7 @@ public class OverlayPane extends JPanel implements AWTEventListener {
       return;
     }
 
-    var windowEventPos = SwingUtilities.convertPoint(source, source.getX(), source.getY(), this);
+    var windowEventPos = SwingUtilities.convertPoint(source, mouseEvent.getX(), mouseEvent.getY(), this);
     if (getDimmedArea().contains(windowEventPos)) {
       mouseEvent.consume();
       if (mouseEvent.getButton() == MouseEvent.BUTTON1) {

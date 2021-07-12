@@ -1,5 +1,7 @@
 package fi.aalto.cs.apluscourses.intellij.model.task;
 
+import static fi.aalto.cs.apluscourses.ui.ideactivities.ComponentDatabase.PROJECT_TOOL_WINDOW;
+
 import com.intellij.openapi.project.Project;
 import fi.aalto.cs.apluscourses.ui.ideactivities.ComponentDatabase;
 import fi.aalto.cs.apluscourses.ui.ideactivities.GenericHighlighter;
@@ -15,12 +17,12 @@ public class ProjectTreePresenter extends IntelliJComponentPresenterBase {
 
   @Override
   protected @Nullable GenericHighlighter getHighlighter() {
-    return ComponentDatabase.getProjectPane() == null ? null
-        : new GenericHighlighter(ComponentDatabase.getProjectPane());
+    var toolWindow = ComponentDatabase.getToolWindow(PROJECT_TOOL_WINDOW, project);
+    return toolWindow == null ? null : new GenericHighlighter(toolWindow.getComponent());
   }
 
   @Override
   public boolean tryToShow() {
-    return ComponentDatabase.showProjectToolWindow(project);
+    return ComponentDatabase.showToolWindow(PROJECT_TOOL_WINDOW, project);
   }
 }

@@ -29,19 +29,31 @@ public class IntelliJActivityFactory implements ActivityFactory {
         return new IdeActionListener(callback, project, arguments.getOrThrow("actionName"), null);
       case "test":
         return new IdeActionListener(callback, project,
-                arguments.getOrThrow("actionName"), arguments.getOrThrow(FILE_PATH));
+            arguments.getOrThrow("actionName"), arguments.getOrThrow(FILE_PATH));
       case "classDeclScala":
-        return new ClassDeclarationListener(callback, project, arguments.getOrThrow("className"),
-                arguments.getArrayOrThrow("classArguments"),
-                arguments.getArrayOrThrow("classHierarchy"), arguments.getOrThrow(FILE_PATH));
+        return new ClassDeclarationListener(callback, project,
+            arguments.getOrThrow("className"),
+            arguments.getArrayOrThrow("classArguments"),
+            arguments.getOrThrow("classHierarchy"),
+            arguments.getArrayOrThrow("traitHierarchy"),
+            arguments.getArrayOrThrow("typeParamClause"),
+            arguments.getArrayOrThrow("modifiers"),
+            arguments.getArrayOrThrow("annotations"),
+            arguments.getOrThrow(FILE_PATH));
       case "functionDefinition":
         return new FunctionDefinitionListener(callback, project,
-                arguments.getOrThrow("methodName"),
-                arguments.getArrayOrThrow("methodArguments"),
-                arguments.getArrayOrThrow("methodBody"),
-                arguments.getOrThrow(FILE_PATH));
+            arguments.getOrThrow("methodName"),
+            arguments.getArrayOrThrow("methodArguments"),
+            arguments.getArrayOrThrow("methodBody"),
+            arguments.getOrThrow(FILE_PATH));
+      case "openRepl":
+        return new RunReplListener(callback, project,
+            arguments.getOrThrow("module"));
+      case "replInput":
+        return new ReplInputListener(callback, project,
+            arguments.getOrThrow("input"));
       default:
-        throw new IllegalArgumentException("Unsupported action: " + action);
+        throw new IllegalArgumentException("Unsupported action: '" + action + "'");
     }
   }
 
@@ -55,16 +67,19 @@ public class IntelliJActivityFactory implements ActivityFactory {
     for (var closedComponent : assertClosed) {
       switch (closedComponent.split("\\|")[0]) {
         case "projectTree":
-          ComponentDatabase.hideProjectToolWindow(project);
+          ComponentDatabase.hideToolWindow(ComponentDatabase.PROJECT_TOOL_WINDOW, project);
           break;
         case "aPlusCourses":
-          ComponentDatabase.hideAPlusToolWindow(project);
+          ComponentDatabase.hideToolWindow(ComponentDatabase.APLUS_TOOL_WINDOW, project);
           break;
         case "editor":
           ComponentDatabase.closeFile(closedComponent.replaceFirst("editor\\|", ""), project);
           break;
+        case "repl":
+          ComponentDatabase.closeRepls(project);
+          break;
         default:
-          throw new IllegalArgumentException("Unsupported component: " + component);
+          throw new IllegalArgumentException("Unsupported component: '" + closedComponent + "'");
       }
     }
     switch (component) {
@@ -73,8 +88,10 @@ public class IntelliJActivityFactory implements ActivityFactory {
       case "editor":
         return new EditorPresenter(instruction, info, actionArguments.getOrThrow(FILE_PATH),
             project);
+      case "repl":
+        return new ReplPresenter(instruction, info, actionArguments.getOrThrow("module"), project);
       default:
-        throw new IllegalArgumentException("Unsupported component: " + component);
+        throw new IllegalArgumentException("Unsupported component: '" + component + "'");
     }
   }
 }

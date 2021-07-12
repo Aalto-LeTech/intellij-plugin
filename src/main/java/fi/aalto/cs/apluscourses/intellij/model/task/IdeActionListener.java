@@ -18,21 +18,17 @@ public class IdeActionListener implements AnActionListener, ActivitiesListener {
   private MessageBusConnection messageBusConnection;
   private final String actionName;
   private final ListenerCallback callback;
-  private String filePath;
+  private final String fileName;
 
   /**
    * Constructor.
-   * @param callback The callback for when the task is complete
-   * @param project The project where the Tutorial is happening
-   * @param action The action to be performed
-   * @param filePath The file's path (optional).
    */
   public IdeActionListener(ListenerCallback callback, Project project,
-                           String action, @Nullable String filePath) {
+                           String action, @Nullable String fileName) {
     this.callback = callback;
     this.project = project;
     this.actionName = action;
-    this.filePath = filePath;
+    this.fileName = fileName;
   }
 
   @Override
@@ -53,10 +49,9 @@ public class IdeActionListener implements AnActionListener, ActivitiesListener {
   @Override
   public void beforeActionPerformed(@NotNull AnAction action, @NotNull DataContext dataContext,
                                     @NotNull AnActionEvent event) {
-    //perhaps create subclasses?
     boolean complete = true;
-    if (filePath != null && !filePath.isEmpty()) {
-      this.filePath = project.getBasePath() + filePath;
+    if (fileName != null && !fileName.isEmpty()) {
+      String filePath = project.getBasePath() + fileName;
       VirtualFile file = event.getDataContext().getData(PlatformDataKeys.VIRTUAL_FILE);
       complete = file != null && filePath.equals(file.getPath());
     }

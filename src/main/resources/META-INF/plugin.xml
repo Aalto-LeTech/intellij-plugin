@@ -75,6 +75,10 @@
                     class="fi.aalto.cs.apluscourses.intellij.actions.SubmitExerciseAction"
                     text="Submit A+ Assignment"
                     icon="PluginIcons.A_PLUS_UPLOAD"/>
+            <action id="fi.aalto.cs.apluscourses.intellij.actions.TutorialAction"
+                    class="fi.aalto.cs.apluscourses.intellij.actions.TutorialAction"
+                    text="Start Tutorial"
+                    icon="PluginIcons.A_PLUS_START" />
             <action id="fi.aalto.cs.apluscourses.intellij.actions.OpenItemAction"
                     class="fi.aalto.cs.apluscourses.intellij.actions.OpenItemAction"
                     text="Open In Browser"
@@ -83,10 +87,6 @@
                     class="fi.aalto.cs.apluscourses.intellij.actions.RefreshExercisesAction"
                     text="Refresh Assignments"
                     icon="PluginIcons.A_PLUS_REFRESH" />
-            <action id="fi.aalto.cs.apluscourses.intellij.actions.TutorialAction"
-                    class="fi.aalto.cs.apluscourses.intellij.actions.TutorialAction"
-                    text="Start Tutorial"
-                    icon="PluginIcons.A_PLUS_IN_GRADING" />
             <group id="fi.aalto.cs.apluscourses.intellij.actions.FilterOptionsActionGroup"
                    class="fi.aalto.cs.apluscourses.intellij.actions.FilterOptionsActionGroup"
                    popup="true"

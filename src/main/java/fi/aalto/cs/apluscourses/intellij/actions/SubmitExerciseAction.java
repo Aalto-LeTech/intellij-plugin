@@ -155,6 +155,10 @@ public class SubmitExerciseAction extends AnAction {
       e.getPresentation().setEnabled(project != null
               && authentication != null && courseViewModel != null
               && (isSubmittableExerciseSelected || isSubmittableSubmissionSelected));
+      var selectedEx = exercisesViewModel.findSelected().getLevel(2);
+      var isTutorial = selectedEx instanceof ExerciseViewModel
+          && ExerciseViewModel.Status.TUTORIAL.equals(((ExerciseViewModel) selectedEx).getStatus());
+      e.getPresentation().setVisible(!isTutorial);
     }
     if ((ActionPlaces.TOOLWINDOW_POPUP).equals(e.getPlace()) && !e.getPresentation().isEnabled()) {
       e.getPresentation().setVisible(false);
