@@ -30,6 +30,8 @@ public class IntelliJActivityFactory implements ActivityFactory {
         return ClassDeclarationListener.create(callback, project, arguments);
       case "functionDefinition":
         return FunctionDefinitionListener.create(callback, project, arguments);
+      case "errors":
+        return ErrorListener.create(callback, project, arguments);
       default:
         throw new IllegalArgumentException("Unsupported action: " + action);
     }
