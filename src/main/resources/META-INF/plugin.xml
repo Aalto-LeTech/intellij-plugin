@@ -28,6 +28,8 @@
                     anchor="right"
                     factoryClass="fi.aalto.cs.apluscourses.intellij.toolwindows.APlusToolWindowFactory"
                     icon="PluginIcons.A_PLUS_LOGO"/>
+
+        <errorHandler implementation="fi.aalto.cs.apluscourses.intellij.utils.ErrorHandler"/>
     </extensions>
 
     <actions>

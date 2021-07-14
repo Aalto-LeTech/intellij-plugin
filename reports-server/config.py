@@ -1,0 +1,8 @@
+SERVER_ADDRESS = ""
+SERVER_PORT = 25
+SERVER_LOGIN = ""
+SERVER_PASSWORD = ""
+
+FROM_ADDRESS = ""
+TO_ADDRESS = ""
+MAIL_SUBJECT = "A+ Courses error logs"
