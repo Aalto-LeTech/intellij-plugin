@@ -2,6 +2,7 @@ package fi.aalto.cs.apluscourses.ui.ideactivities;
 
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.geom.RectangularShape;
 import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ public class GenericHighlighter {
     return component;
   }
 
-  public List<Rectangle> getArea() {
+  public List<RectangularShape> getArea() {
     return Collections.singletonList(
         new Rectangle(0, 0, getComponent().getWidth(), getComponent().getHeight()));
   }
