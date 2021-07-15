@@ -55,6 +55,10 @@
                     class="fi.aalto.cs.apluscourses.intellij.actions.AboutAction"
                     text="About the A+ Courses Plugin"
                     description="Information about the A+ Courses plugin for IntelliJ" />
+            <action id="fi.aalto.cs.apluscourses.intellij.actions.AssistantModeAction"
+                    class="fi.aalto.cs.apluscourses.intellij.actions.AssistantModeAction"
+                    text="Assistant Mode"
+                    description="Toggles the assistant mode" />
         </group>
         <group id="fi.aalto.cs.apluscourses.intellij.actions.ActionGroups.MODULE_ACTIONS"
                text="A+ Module"
@@ -93,6 +97,14 @@
                    text="Filter Assignments"
                    icon="PluginIcons.A_PLUS_FILTER">
             </group>
+            <action id="fi.aalto.cs.apluscourses.intellij.actions.SelectStudentAction"
+                    class="fi.aalto.cs.apluscourses.intellij.actions.SelectStudentAction"
+                    text="Select Student"
+                    icon="PluginIcons.A_PLUS_USER_ACTIVE" />
+            <action id="fi.aalto.cs.apluscourses.intellij.actions.DownloadSubmissionAction"
+                    class="fi.aalto.cs.apluscourses.intellij.actions.DownloadSubmissionAction"
+                    text="Download Submission"
+                    icon="PluginIcons.A_PLUS_DOWNLOAD" />
         </group>
         <group id="fi.aalto.cs.apluscourses.intellij.actions.ActionGroups.TOOL_WINDOW_ACTIONS"
                text="A+ Tool Window"

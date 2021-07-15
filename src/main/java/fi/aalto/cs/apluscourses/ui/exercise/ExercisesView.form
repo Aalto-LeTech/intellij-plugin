@@ -23,7 +23,7 @@
               <separatorSize width="10" height="0"/>
             </properties>
           </component>
-          <component id="de40" class="javax.swing.JLabel">
+          <component id="de40" class="javax.swing.JLabel" binding="title" custom-create="true">
             <constraints/>
             <properties>
               <text resource-bundle="resources" key="ui.toolWindow.subTab.exercises.name"/>

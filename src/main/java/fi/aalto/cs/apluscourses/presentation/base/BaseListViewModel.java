@@ -30,7 +30,7 @@ public class BaseListViewModel<E extends ListElementViewModel<?>> extends Abstra
   private final ListSelectionModel selectionModel;
 
   @NotNull
-  private final List<E> elements;
+  protected final List<E> elements;
 
   /**
    * A constructor.

@@ -24,7 +24,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtilRt;
 import fi.aalto.cs.apluscourses.intellij.DialogHelper;
-import fi.aalto.cs.apluscourses.intellij.actions.SubmitExerciseAction.Tagger;
 import fi.aalto.cs.apluscourses.intellij.model.ProjectModuleSource;
 import fi.aalto.cs.apluscourses.intellij.notifications.ExerciseNotSelectedNotification;
 import fi.aalto.cs.apluscourses.intellij.notifications.MissingFileNotification;
@@ -36,11 +35,13 @@ import fi.aalto.cs.apluscourses.intellij.notifications.SubmissionSentNotificatio
 import fi.aalto.cs.apluscourses.intellij.services.DefaultGroupIdSetting;
 import fi.aalto.cs.apluscourses.intellij.services.Dialogs;
 import fi.aalto.cs.apluscourses.intellij.services.MainViewModelProvider;
+import fi.aalto.cs.apluscourses.intellij.utils.Interfaces;
 import fi.aalto.cs.apluscourses.model.Authentication;
 import fi.aalto.cs.apluscourses.model.Course;
 import fi.aalto.cs.apluscourses.model.Exercise;
 import fi.aalto.cs.apluscourses.model.ExerciseDataSource;
 import fi.aalto.cs.apluscourses.model.ExerciseGroup;
+import fi.aalto.cs.apluscourses.model.ExercisesTree;
 import fi.aalto.cs.apluscourses.model.FileDoesNotExistException;
 import fi.aalto.cs.apluscourses.model.FileFinder;
 import fi.aalto.cs.apluscourses.model.Group;
@@ -106,9 +107,9 @@ public class SubmitExerciseActionTest {
   AnActionEvent event;
   SubmitExerciseAction action;
   Points points;
-  Tagger tagger;
-  SubmitExerciseAction.DocumentSaver documentSaver;
-  SubmitExerciseAction.LanguageSource languageSource;
+  Interfaces.Tagger tagger;
+  Interfaces.DocumentSaver documentSaver;
+  Interfaces.LanguageSource languageSource;
   DefaultGroupIdSetting defaultGroupIdSetting;
 
   /**
@@ -153,7 +154,7 @@ public class SubmitExerciseActionTest {
     courseViewModel = new CourseViewModel(course);
     mainViewModel.courseViewModel.set(courseViewModel);
 
-    exercises = new ExercisesTreeViewModel(exerciseGroups, new Options());
+    exercises = new ExercisesTreeViewModel(new ExercisesTree(exerciseGroups), new Options());
     exercises.getChildren().get(0).getChildren().get(0).setSelected(true);
     mainViewModel.exercisesViewModel.set(exercises);
 
@@ -172,7 +173,7 @@ public class SubmitExerciseActionTest {
 
     mainVmProvider = mock(MainViewModelProvider.class);
     doReturn(mainViewModel).when(mainVmProvider).getMainViewModel(project);
-    var authProvider = mock(SubmitExerciseAction.AuthenticationProvider.class);
+    var authProvider = mock(Interfaces.AuthenticationProvider.class);
     doReturn(authentication).when(authProvider).getAuthentication(project);
 
 
@@ -207,11 +208,11 @@ public class SubmitExerciseActionTest {
     submissionDialogFactory = new DialogHelper.Factory<>(submissionDialog, project);
     dialogs.register(SubmissionViewModel.class, submissionDialogFactory);
 
-    tagger = mock(Tagger.class);
+    tagger = mock(Interfaces.Tagger.class);
 
-    documentSaver = mock(SubmitExerciseAction.DocumentSaver.class);
+    documentSaver = mock(Interfaces.DocumentSaver.class);
     
-    languageSource = mock(SubmitExerciseAction.LanguageSource.class);
+    languageSource = mock(Interfaces.LanguageSource.class);
     doReturn(language).when(languageSource).getLanguage(project);
     
     defaultGroupIdSetting = new TestDefaultGroupIdSetting();
@@ -308,7 +309,7 @@ public class SubmitExerciseActionTest {
     var exerciseGroup = new ExerciseGroup(0, "", "", true);
     exerciseGroup.addExercise(exercise);
     mainViewModel.exercisesViewModel.set(
-        new ExercisesTreeViewModel(List.of(exerciseGroup), new Options()));
+        new ExercisesTreeViewModel(new ExercisesTree(List.of(exerciseGroup)), new Options()));
     mainViewModel.exercisesViewModel
         .get().getChildren().get(0).getChildren().get(0).setSelected(true);
 

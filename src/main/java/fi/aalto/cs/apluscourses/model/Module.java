@@ -13,16 +13,18 @@ import org.json.JSONObject;
 public abstract class Module extends Component {
 
   @NotNull
-  private final URL url;
+  protected final URL url;
 
   @NotNull
-  private Version version;
+  protected Version version;
   @Nullable
-  private Version localVersion;
+  protected Version localVersion;
   @NotNull
-  private String changelog;
+  protected String changelog;
   @Nullable
-  private ZonedDateTime downloadedAt;
+  protected ZonedDateTime downloadedAt;
+  @NotNull
+  protected String originalName;
 
   /* synchronize with this when accessing variable fields of this class */
   private final Object moduleLock = new Object();
@@ -43,13 +45,24 @@ public abstract class Module extends Component {
                    @NotNull String changelog,
                    @NotNull Version version,
                    @Nullable Version localVersion,
-                   @Nullable ZonedDateTime downloadedAt) {
+                   @Nullable ZonedDateTime downloadedAt,
+                   @NotNull String originalName) {
     super(name);
     this.url = url;
     this.version = version;
     this.localVersion = localVersion;
     this.changelog = changelog;
     this.downloadedAt = downloadedAt;
+    this.originalName = originalName;
+  }
+
+  protected Module(@NotNull String name,
+                   @NotNull URL url,
+                   @NotNull String changelog,
+                   @NotNull Version version,
+                   @Nullable Version localVersion,
+                   @Nullable ZonedDateTime downloadedAt) {
+    this(name, url, changelog, version, localVersion, downloadedAt, name);
   }
 
   /**
@@ -193,6 +206,13 @@ public abstract class Module extends Component {
     synchronized (moduleLock) {
       changelog = newChangelog;
     }
+  }
+
+  public abstract Module copy(@NotNull String newName);
+
+  @Override
+  public @NotNull String getOriginalName() {
+    return originalName;
   }
 
 }

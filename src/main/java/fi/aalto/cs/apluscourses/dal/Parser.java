@@ -4,6 +4,7 @@ import fi.aalto.cs.apluscourses.model.Exercise;
 import fi.aalto.cs.apluscourses.model.ExerciseGroup;
 import fi.aalto.cs.apluscourses.model.Group;
 import fi.aalto.cs.apluscourses.model.Points;
+import fi.aalto.cs.apluscourses.model.SubmissionInfo;
 import fi.aalto.cs.apluscourses.model.SubmissionResult;
 import fi.aalto.cs.apluscourses.model.Tutorial;
 import java.time.ZonedDateTime;
@@ -16,6 +17,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public interface Parser {
+
+  <T> List<T> parsePaginatedResults(@NotNull JSONObject object,
+                                    @NotNull Function<JSONObject, T> parseFunction);
+
+  String parseNextPageUrl(@NotNull JSONObject object);
+
+  SubmissionInfo parseSubmissionInfo(@NotNull JSONObject object);
 
   Group parseGroup(@NotNull JSONObject object);
 

@@ -2,6 +2,7 @@ package fi.aalto.cs.apluscourses.intellij.services;
 
 import static fi.aalto.cs.apluscourses.intellij.services.PluginSettings.LocalIdeSettingsNames.A_PLUS_DEFAULT_GROUP;
 import static fi.aalto.cs.apluscourses.intellij.services.PluginSettings.LocalIdeSettingsNames.A_PLUS_IMPORTED_IDE_SETTINGS;
+import static fi.aalto.cs.apluscourses.intellij.services.PluginSettings.LocalIdeSettingsNames.A_PLUS_IS_ASSISTANT_MODE;
 import static fi.aalto.cs.apluscourses.intellij.services.PluginSettings.LocalIdeSettingsNames.A_PLUS_SHOW_REPL_CONFIGURATION_DIALOG;
 import static fi.aalto.cs.apluscourses.utils.PluginResourceBundle.getText;
 
@@ -17,6 +18,7 @@ import fi.aalto.cs.apluscourses.intellij.notifications.DefaultNotifier;
 import fi.aalto.cs.apluscourses.intellij.utils.CourseFileManager;
 import fi.aalto.cs.apluscourses.intellij.utils.IntelliJFilterOption;
 import fi.aalto.cs.apluscourses.intellij.utils.ProjectKey;
+import fi.aalto.cs.apluscourses.model.ExercisesTree;
 import fi.aalto.cs.apluscourses.presentation.CourseEndedBannerViewModel;
 import fi.aalto.cs.apluscourses.presentation.CourseViewModel;
 import fi.aalto.cs.apluscourses.presentation.MainViewModel;
@@ -26,7 +28,6 @@ import fi.aalto.cs.apluscourses.presentation.exercise.ExercisesTreeViewModel;
 import fi.aalto.cs.apluscourses.presentation.filter.Option;
 import fi.aalto.cs.apluscourses.presentation.filter.Options;
 import fi.aalto.cs.apluscourses.utils.observable.ObservableProperty;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,7 +70,8 @@ public class PluginSettings implements MainViewModelProvider, DefaultGroupIdSett
     A_PLUS_SHOW_NON_SUBMITTABLE("A+.showNonSubmittable"),
     A_PLUS_SHOW_COMPLETED("A+.showCompleted"),
     A_PLUS_SHOW_OPTIONAL("A+.showOptional"),
-    A_PLUS_SHOW_CLOSED("A+.showClosed");
+    A_PLUS_SHOW_CLOSED("A+.showClosed"),
+    A_PLUS_IS_ASSISTANT_MODE("A+.assistantMode");
 
     private final String name;
 
@@ -172,14 +174,14 @@ public class PluginSettings implements MainViewModelProvider, DefaultGroupIdSett
       // assumes that the project isn't a course project. This means that the user would be
       // instructed to turn the project into a course project for an example when the token is
       // missing.
-      var exercisesViewModel = new ExercisesTreeViewModel(new ArrayList<>(), new Options());
+      var exercisesViewModel = new ExercisesTreeViewModel(new ExercisesTree(), new Options());
       exercisesViewModel.setAuthenticated(courseProject.getAuthentication() != null);
       mainViewModel.exercisesViewModel.set(exercisesViewModel);
       courseProject.courseUpdated.addListener(
           mainViewModel.courseViewModel, ObservableProperty::valueChanged);
       courseProject.exercisesUpdated.addListener(mainViewModel, viewModel ->
           viewModel.updateExercisesViewModel(
-              courseProject.getExerciseGroups(), courseProject.getAuthentication()));
+              courseProject.getExerciseTree(), courseProject.getAuthentication()));
       courseProject.getCourseUpdater().restart();
       courseProject.getExercisesUpdater().restart();
       return courseProject;
@@ -201,6 +203,20 @@ public class PluginSettings implements MainViewModelProvider, DefaultGroupIdSett
         new ProjectKey(project),
         key -> new CourseFileManager(project, new DefaultNotifier())
     );
+  }
+
+  public boolean isAssistantMode() {
+    return Boolean.parseBoolean(
+        applicationPropertiesManager.getValue(A_PLUS_IS_ASSISTANT_MODE.getName()));
+  }
+
+  /**
+   * Sets the property for showing assistant tools.
+   */
+  public void setAssistantMode(boolean assistantMode) {
+    applicationPropertiesManager
+        .setValue(A_PLUS_IS_ASSISTANT_MODE.getName(),
+            String.valueOf(assistantMode));
   }
 
   /**

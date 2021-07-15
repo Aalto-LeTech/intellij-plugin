@@ -26,6 +26,7 @@ import fi.aalto.cs.apluscourses.intellij.services.DefaultGroupIdSetting;
 import fi.aalto.cs.apluscourses.intellij.services.Dialogs;
 import fi.aalto.cs.apluscourses.intellij.services.MainViewModelProvider;
 import fi.aalto.cs.apluscourses.intellij.services.PluginSettings;
+import fi.aalto.cs.apluscourses.intellij.utils.Interfaces;
 import fi.aalto.cs.apluscourses.intellij.utils.VfsUtil;
 import fi.aalto.cs.apluscourses.model.Authentication;
 import fi.aalto.cs.apluscourses.model.Exercise;
@@ -37,7 +38,6 @@ import fi.aalto.cs.apluscourses.model.SubmittableFile;
 import fi.aalto.cs.apluscourses.presentation.CourseViewModel;
 import fi.aalto.cs.apluscourses.presentation.MainViewModel;
 import fi.aalto.cs.apluscourses.presentation.ModuleSelectionViewModel;
-import fi.aalto.cs.apluscourses.presentation.base.BaseTreeViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExerciseGroupViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExerciseViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExercisesTreeViewModel;
@@ -63,7 +63,7 @@ public class SubmitExerciseAction extends AnAction {
   private final MainViewModelProvider mainViewModelProvider;
 
   @NotNull
-  private final AuthenticationProvider authenticationProvider;
+  private final Interfaces.AuthenticationProvider authenticationProvider;
 
   @NotNull
   private final FileFinder fileFinder;
@@ -78,12 +78,12 @@ public class SubmitExerciseAction extends AnAction {
   private final Notifier notifier;
 
   @NotNull
-  private final Tagger tagger;
+  private final Interfaces.Tagger tagger;
 
-  private final DocumentSaver documentSaver;
+  private final Interfaces.DocumentSaver documentSaver;
 
   // TODO: store language and default group ID in the object model and read them from there
-  private final LanguageSource languageSource;
+  private final Interfaces.LanguageSource languageSource;
 
   private final DefaultGroupIdSetting defaultGroupIdSetting;
 
@@ -111,14 +111,14 @@ public class SubmitExerciseAction extends AnAction {
    * for testing purposes.
    */
   public SubmitExerciseAction(@NotNull MainViewModelProvider mainViewModelProvider,
-                              @NotNull AuthenticationProvider authenticationProvider,
+                              @NotNull Interfaces.AuthenticationProvider authenticationProvider,
                               @NotNull FileFinder fileFinder,
                               @NotNull ProjectModuleSource moduleSource,
                               @NotNull Dialogs dialogs,
                               @NotNull Notifier notifier,
-                              @NotNull Tagger tagger,
-                              @NotNull DocumentSaver documentSaver,
-                              @NotNull LanguageSource languageSource,
+                              @NotNull Interfaces.Tagger tagger,
+                              @NotNull Interfaces.DocumentSaver documentSaver,
+                              @NotNull Interfaces.LanguageSource languageSource,
                               @NotNull DefaultGroupIdSetting defaultGroupIdSetting) {
     this.mainViewModelProvider = mainViewModelProvider;
     this.authenticationProvider = authenticationProvider;
@@ -189,9 +189,9 @@ public class SubmitExerciseAction extends AnAction {
       return;
     }
 
-    BaseTreeViewModel.Selection selection = exercisesViewModel.findSelected();
-    ExerciseViewModel selectedExercise = (ExerciseViewModel) selection.getLevel(2);
-    ExerciseGroupViewModel selectedExerciseGroup = (ExerciseGroupViewModel) selection.getLevel(1);
+    var selection = (ExercisesTreeViewModel.ExerciseTreeSelection) exercisesViewModel.findSelected();
+    ExerciseViewModel selectedExercise = selection.getExercise();
+    ExerciseGroupViewModel selectedExerciseGroup = selection.getExerciseGroup();
     if (selectedExercise == null || selectedExerciseGroup == null) {
       notifier.notifyAndHide(new ExerciseNotSelectedNotification(), project);
       return;
@@ -305,25 +305,5 @@ public class SubmitExerciseAction extends AnAction {
     public String getModuleName() {
       return moduleName;
     }
-  }
-
-  @FunctionalInterface
-  public interface AuthenticationProvider {
-    Authentication getAuthentication(@Nullable Project project);
-  }
-
-  @FunctionalInterface
-  public interface Tagger {
-    void putSystemLabel(@Nullable Project project, @NotNull String tag, int color);
-  }
-
-  @FunctionalInterface
-  public interface DocumentSaver {
-    void saveAllDocuments();
-  }
-
-  @FunctionalInterface
-  public interface LanguageSource {
-    @NotNull String getLanguage(@NotNull Project project);
   }
 }

@@ -1,5 +1,7 @@
 package fi.aalto.cs.apluscourses.dal;
 
+import static fi.aalto.cs.apluscourses.utils.ListUtil.appendTwoLists;
+
 import fi.aalto.cs.apluscourses.model.Authentication;
 import fi.aalto.cs.apluscourses.model.Cache;
 import fi.aalto.cs.apluscourses.model.Course;
@@ -10,21 +12,24 @@ import fi.aalto.cs.apluscourses.model.Group;
 import fi.aalto.cs.apluscourses.model.InvalidAuthenticationException;
 import fi.aalto.cs.apluscourses.model.JsonCache;
 import fi.aalto.cs.apluscourses.model.Points;
+import fi.aalto.cs.apluscourses.model.Student;
 import fi.aalto.cs.apluscourses.model.Submission;
+import fi.aalto.cs.apluscourses.model.SubmissionInfo;
 import fi.aalto.cs.apluscourses.model.SubmissionResult;
 import fi.aalto.cs.apluscourses.model.Tutorial;
 import fi.aalto.cs.apluscourses.model.User;
 import fi.aalto.cs.apluscourses.utils.CoursesClient;
-import fi.aalto.cs.apluscourses.utils.JsonUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.http.Header;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +44,9 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
   private static final String COURSES = "courses";
   private static final String POINTS = "points";
   private static final String USERS = "users";
+  private static final String STUDENTS = "students";
+  public static final String RESULTS = "results";
+  public static final String ME = "me";
 
   @NotNull
   private final Client client;
@@ -75,6 +83,29 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
     this.parser = parser;
   }
 
+  @Override
+  public <T> List<T> getPaginatedResults(@NotNull String url,
+                                         @NotNull Authentication authentication,
+                                         @Nullable ZonedDateTime zonedDateTime,
+                                         @NotNull Function<JSONObject, T> parseFunction)
+      throws IOException {
+    JSONObject response = zonedDateTime == null ? client.fetch(url, authentication)
+        : client.fetch(url, authentication, zonedDateTime);
+    var results = parser.parsePaginatedResults(response, parseFunction);
+    var nextPage = parser.parseNextPageUrl(response);
+
+    return nextPage == null ? results
+        : appendTwoLists(results, getPaginatedResults(nextPage, authentication, zonedDateTime, parseFunction));
+  }
+
+  @Override
+  public <T> List<T> getPaginatedResults(@NotNull String url,
+                                         @NotNull Authentication authentication,
+                                         @NotNull Function<JSONObject, T> parseFunction)
+      throws IOException {
+    return getPaginatedResults(url, authentication, null, parseFunction);
+  }
+
   /**
    * Get all of the groups from the A+ API for the user corresponding to the given authentication. A
    * group with id 0 and a single member name "Submit alone" is added to the beginning of the list.
@@ -86,11 +117,7 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
   public List<Group> getGroups(@NotNull Course course, @NotNull Authentication authentication)
       throws IOException {
     String url = apiUrl + COURSES + "/" + course.getId() + "/mygroups/";
-    JSONObject response = client.fetch(url, authentication);
-    return List.of(JsonUtil.parseArray(response.getJSONArray("results"),
-        JSONArray::getJSONObject,
-        parser::parseGroup,
-        Group[]::new));
+    return getPaginatedResults(url, authentication, Group::fromJsonObject);
   }
 
   /**
@@ -105,8 +132,7 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
                                                @NotNull Authentication authentication)
       throws IOException {
     String url = apiUrl + COURSES + "/" + course.getId() + "/" + EXERCISES + "/";
-    JSONObject response = client.fetch(url, authentication);
-    return parser.parseExerciseGroups(response.getJSONArray("results"));
+    return getPaginatedResults(url, authentication, ExerciseGroup::fromJsonObject);
   }
 
   /**
@@ -119,7 +145,15 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
   @NotNull
   public Points getPoints(@NotNull Course course, @NotNull Authentication authentication)
       throws IOException {
-    String url = apiUrl + COURSES + "/" + course.getId() + "/" + POINTS + "/me/";
+    return getPoints(course, authentication, null);
+  }
+
+  @Override
+  @NotNull
+  public Points getPoints(@NotNull Course course, @NotNull Authentication authentication,
+                          @Nullable Student student) throws IOException {
+    String url = apiUrl + COURSES + "/" + course.getId() + "/" + POINTS + "/"
+        + (student == null ? ME : student.getId()) + "/";
     JSONObject response = client.fetch(url, authentication);
     return parser.parsePoints(response);
   }
@@ -150,9 +184,18 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
   @Override
   @NotNull
   public User getUser(@NotNull Authentication authentication) throws IOException {
-    String url = apiUrl + USERS + "/me/";
+    String url = apiUrl + USERS + "/" + ME + "/";
     JSONObject response = client.fetch(url, authentication);
     return new User(authentication, parser.parseUserName(response));
+  }
+
+  @Override
+  @NotNull
+  public List<Student> getStudents(@NotNull Course course,
+                                   @NotNull Authentication authentication,
+                                   @NotNull ZonedDateTime minCacheEntryTime) throws IOException {
+    String url = apiUrl + COURSES + "/" + course.getId() + "/" + STUDENTS + "/";
+    return getPaginatedResults(url, authentication, minCacheEntryTime, Student::fromJsonObject);
   }
 
   @Override
@@ -238,6 +281,27 @@ public class APlusExerciseDataSource implements ExerciseDataSource {
               .map(Header::getValue)
               .orElse(null)
       );
+    }
+
+    @Override
+    public <T> List<T> parsePaginatedResults(@NotNull JSONObject object,
+                                             @NotNull Function<JSONObject, T> parseFunction) {
+      var jsonResults = object.getJSONArray(RESULTS);
+      var results = new ArrayList<T>();
+      for (int i = 0; i < jsonResults.length(); i++) {
+        results.add(parseFunction.apply(jsonResults.getJSONObject(i)));
+      }
+      return results;
+    }
+
+    @Override
+    public String parseNextPageUrl(@NotNull JSONObject object) {
+      return object.optString("next", null);
+    }
+
+    @Override
+    public SubmissionInfo parseSubmissionInfo(@NotNull JSONObject object) {
+      return SubmissionInfo.fromJsonObject(object);
     }
 
     @Override

@@ -81,8 +81,7 @@ public class ExercisesTreeRenderer extends ColoredTreeCellRenderer {
     } else if (viewModel instanceof SubmissionResultViewModel) {
       SubmissionResultViewModel resultViewModel = (SubmissionResultViewModel) viewModel;
       setEnabled(true);
-      append("", SimpleTextAttributes.REGULAR_ATTRIBUTES, true); // disable search highlighting
-      append(resultViewModel.getPresentableName(), SimpleTextAttributes.REGULAR_ATTRIBUTES, false);
+      append(resultViewModel.getPresentableName(), SimpleTextAttributes.REGULAR_ATTRIBUTES, true);
       append(" [" + resultViewModel.getStatusText() + "]", STATUS_TEXT_STYLE, false);
       setToolTipText(getText("ui.exercise.ExercisesTreeRenderer.doubleClickToOpenBrowser"));
     }

@@ -90,7 +90,21 @@ public class CoursesClient {
    *                                     response isn't 2xx or the response is missing a body.
    */
   public static void fetch(@NotNull URL url, @NotNull File file) throws IOException {
-    fetchAndConsume(url, null,
+    fetch(url, file, null);
+  }
+
+  /**
+   * Downloads a file from the given URL into the given file.
+   *
+   * @throws IOException                 If an error (e.g. network error) occurs while downloading
+   *                                     the file. This is an instance of {@link
+   *                                     UnexpectedResponseException} if the status code of the
+   *                                     response isn't 2xx or the response is missing a body.
+   */
+  public static void fetch(@NotNull URL url,
+                           @NotNull File file,
+                           @Nullable HttpAuthentication authentication) throws IOException {
+    fetchAndConsume(url, authentication,
         response -> {
           requireResponseEntity(response);
           FileUtils.copyInputStreamToFile(response.getEntity().getContent(), file);

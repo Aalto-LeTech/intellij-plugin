@@ -97,7 +97,7 @@ public class BaseTreeViewModel<T> extends SelectableNodeViewModel<T> {
   }
 
   public static class Selection {
-    private final List<SelectableNodeViewModel<?>> path;
+    protected final List<SelectableNodeViewModel<?>> path;
 
     public Selection(SelectableNodeViewModel<?>... pathToSelected) {
       this(List.of(pathToSelected));

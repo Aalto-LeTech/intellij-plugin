@@ -1,5 +1,6 @@
 package fi.aalto.cs.apluscourses.presentation.exercise;
 
+import static fi.aalto.cs.apluscourses.utils.PluginResourceBundle.getAndReplaceText;
 import static fi.aalto.cs.apluscourses.utils.PluginResourceBundle.getText;
 
 import fi.aalto.cs.apluscourses.model.SubmissionResult;
@@ -23,12 +24,13 @@ public class SubmissionResultViewModel extends SelectableNodeViewModel<Submissio
 
   @NotNull
   public String getPresentableName() {
-    return getText("presentation.submissionResultViewModel.nameStart") + " " + submissionNumber;
+    return getAndReplaceText("presentation.submissionResultViewModel.name",
+        submissionNumber, String.valueOf(getId()));
   }
 
 
   /**
-   * {@summary}Constructs text appearing in parenthesis.
+   * Constructs text appearing in parenthesis.
    *
    * @return Returns status text for assignment.
    *         Methods considers case assignment has not yet been graded
@@ -42,7 +44,13 @@ public class SubmissionResultViewModel extends SelectableNodeViewModel<Submissio
   }
 
   private String getStatus(SubmissionResult model) {
-    return model.getPoints() + "/" + model.getExercise().getMaxPoints() + " points";
+    return getAndReplaceText("presentation.submissionResultViewModel.points",
+        model.getPoints(), model.getExercise().getMaxPoints());
+  }
+
+  @Override
+  public @NotNull String getSearchableString() {
+    return getPresentableName();
   }
 
   @Override

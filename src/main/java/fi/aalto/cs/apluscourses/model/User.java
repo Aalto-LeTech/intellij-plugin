@@ -10,7 +10,7 @@ public class User {
   private final String userName;
 
   /**
-   * Constructor for User that fetches the user's name given an Authentication.
+   * A constructor.
    */
   public User(@NotNull Authentication authentication,
               @NotNull String userName) {

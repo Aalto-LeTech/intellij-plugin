@@ -12,6 +12,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.project.Project;
 import fi.aalto.cs.apluscourses.intellij.services.MainViewModelProvider;
+import fi.aalto.cs.apluscourses.model.ExercisesTree;
 import fi.aalto.cs.apluscourses.presentation.MainViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExercisesTreeViewModel;
 import fi.aalto.cs.apluscourses.presentation.filter.Option;
@@ -44,7 +45,7 @@ public class FilterOptionsActionGroupTest {
 
     MainViewModel mainViewModel = new MainViewModel(new Options());
     ExercisesTreeViewModel exercisesViewModel =
-            spy(new ExercisesTreeViewModel(Collections.emptyList(), new Options()));
+            spy(new ExercisesTreeViewModel(new ExercisesTree(), new Options()));
     when(exercisesViewModel.getFilterOptions()).thenReturn(filterOptions);
     mainViewModel.exercisesViewModel.set(exercisesViewModel);
     MainViewModelProvider mainViewModelProvider = mock(MainViewModelProvider.class);

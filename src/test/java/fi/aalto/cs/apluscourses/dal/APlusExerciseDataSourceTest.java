@@ -1,24 +1,18 @@
 package fi.aalto.cs.apluscourses.dal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.intellij.openapi.util.io.FileUtilRt;
 import fi.aalto.cs.apluscourses.model.Authentication;
-import fi.aalto.cs.apluscourses.model.Course;
 import fi.aalto.cs.apluscourses.model.Exercise;
 import fi.aalto.cs.apluscourses.model.ExerciseDataSource;
-import fi.aalto.cs.apluscourses.model.ExerciseGroup;
 import fi.aalto.cs.apluscourses.model.Group;
-import fi.aalto.cs.apluscourses.model.ModelExtensions;
 import fi.aalto.cs.apluscourses.model.Submission;
 import fi.aalto.cs.apluscourses.model.SubmissionInfo;
 import fi.aalto.cs.apluscourses.model.SubmittableFile;
@@ -32,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.Before;
@@ -66,59 +59,6 @@ public class APlusExerciseDataSourceTest {
     assertEquals(url, exerciseDataSource.getApiUrl());
     assertTrue(exerciseDataSource.getClient() instanceof APlusExerciseDataSource.DefaultDataAccess);
     assertTrue(exerciseDataSource.getParser() instanceof APlusExerciseDataSource.DefaultDataAccess);
-  }
-
-  @Test
-  public void testGetGroups() throws IOException {
-    JSONObject object0 = new JSONObject();
-    JSONObject object1 = new JSONObject();
-
-    JSONObject response = new JSONObject()
-        .put("results", new JSONArray()
-            .put(object0)
-            .put(object1));
-
-    Group group0 = new Group(101, new ArrayList<>());
-    Group group1 = new Group(102, new ArrayList<>());
-
-    doReturn(response).when(client)
-        .fetch("https://example.com/courses/123/mygroups/", authentication);
-    doReturn(group0).when(parser).parseGroup(object0);
-    doReturn(group1).when(parser).parseGroup(object1);
-
-    Course course = new ModelExtensions.TestCourse("123");
-
-    List<Group> groups = exerciseDataSource.getGroups(course, authentication);
-
-    assertEquals(2, groups.size());
-    assertSame(group0, groups.get(0));
-    assertSame(group1, groups.get(1));
-  }
-
-  @Test
-  public void testGetExerciseGroups() throws IOException {
-    JSONObject object0 = new JSONObject();
-    JSONObject object1 = new JSONObject();
-    JSONArray array = new JSONArray().put(object0).put(object1);
-
-    JSONObject response = new JSONObject().put("results", array);
-
-    ExerciseGroup exGroup0 = new ExerciseGroup(0, "First Week", "", true);
-    ExerciseGroup exGroup1 = new ExerciseGroup(1, "Second Week", "", true);
-
-    doReturn(response).when(client)
-        .fetch("https://example.com/courses/99/exercises/", authentication);
-    doReturn(List.of(exGroup0, exGroup1))
-        .when(parser)
-        .parseExerciseGroups(same(array));
-
-    Course course = new ModelExtensions.TestCourse("99");
-
-    var exGroups = exerciseDataSource.getExerciseGroups(course, authentication);
-
-    assertEquals(2, exGroups.size());
-    assertSame(exGroup0, exGroups.get(0));
-    assertSame(exGroup1, exGroups.get(1));
   }
 
   @Test

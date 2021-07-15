@@ -21,10 +21,19 @@ public class MissingFileNotification extends Notification {
    * found in the given module.
    */
   public MissingFileNotification(@NotNull Path path, @NotNull String filename) {
+    this(path, filename, false);
+  }
+
+  /**
+   * Construct a missing file notification that explains that a file with the given name couldn't be
+   * found in the given module.
+   */
+  public MissingFileNotification(@NotNull Path path, @NotNull String filename, boolean download) {
     super(
         PluginSettings.A_PLUS,
         getText("notification.MissingFileNotification.title"),
-        getAndReplaceText("notification.MissingFileNotification.content", filename, path),
+        getAndReplaceText(download ? "notification.MissingFileNotification.contentDownload"
+            : "notification.MissingFileNotification.content", filename, path),
         NotificationType.ERROR);
     this.path = path;
     this.filename = filename;

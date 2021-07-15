@@ -49,6 +49,11 @@ public abstract class Component {
   }
 
   @NotNull
+  public String getOriginalName() {
+    return getName();
+  }
+
+  @NotNull
   public abstract Path getPath();
 
   public abstract void fetch() throws IOException;

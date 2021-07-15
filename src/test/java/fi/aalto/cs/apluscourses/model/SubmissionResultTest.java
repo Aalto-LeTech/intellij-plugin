@@ -5,6 +5,7 @@ import static org.junit.Assert.assertSame;
 
 import java.util.Collections;
 import java.util.OptionalLong;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -42,7 +43,8 @@ public class SubmissionResultTest {
         .put("exercise", new JSONObject()
             .put("html_url", "https://example.com/"))
         .put("status", "ready")
-        .put("late_penalty_applied", 0.6);
+        .put("late_penalty_applied", 0.6)
+        .put("files", new JSONArray());
     SubmissionResult submissionResult = SubmissionResult.fromJsonObject(jsonObject, exercise);
     exercise.addSubmissionResult(submissionResult);
 

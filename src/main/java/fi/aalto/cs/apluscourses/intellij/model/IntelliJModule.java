@@ -38,9 +38,20 @@ class IntelliJModule
                  @NotNull Version version,
                  @Nullable Version localVersion,
                  @Nullable ZonedDateTime downloadedAt,
-                 @NotNull APlusProject project) {
-    super(name, url, changelog, version, localVersion, downloadedAt);
+                 @NotNull APlusProject project,
+                 @NotNull String originalName) {
+    super(name, url, changelog, version, localVersion, downloadedAt, originalName);
     this.project = project;
+  }
+
+  IntelliJModule(@NotNull String name,
+                 @NotNull URL url,
+                 @NotNull String changelog,
+                 @NotNull Version version,
+                 @Nullable Version localVersion,
+                 @Nullable ZonedDateTime downloadedAt,
+                 @NotNull APlusProject project) {
+    this(name, url, changelog, version, localVersion, downloadedAt, project, name);
   }
 
   @NotNull
@@ -57,8 +68,11 @@ class IntelliJModule
 
   @Override
   public void fetchInternal() throws IOException {
-    new RemoteZippedDir(getUrl().toString(), getName())
+    new RemoteZippedDir(getUrl().toString(), getOriginalName())
         .copyTo(getFullPath(), project.getProject());
+    if (!getFullPath().resolve(getOriginalName() + ".iml").toFile().renameTo(getImlFile())) {
+      throw new IOException("Could not rename iml file.");
+    }
   }
 
   @Override
@@ -148,4 +162,8 @@ class IntelliJModule
     return ReadAction.compute(() -> VfsUtil.hasDirectoryChanges(fullPath, timeStamp));
   }
 
+  @Override
+  public Module copy(@NotNull String newName) {
+    return new IntelliJModule(newName, url, changelog, version, localVersion, downloadedAt, project, originalName);
+  }
 }
