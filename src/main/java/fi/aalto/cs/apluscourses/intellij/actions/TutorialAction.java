@@ -17,6 +17,7 @@ import fi.aalto.cs.apluscourses.presentation.base.BaseTreeViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExerciseGroupViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExerciseViewModel;
 import fi.aalto.cs.apluscourses.presentation.exercise.ExercisesTreeViewModel;
+import fi.aalto.cs.apluscourses.presentation.ideactivities.TutorialDialogs;
 import fi.aalto.cs.apluscourses.presentation.ideactivities.TutorialViewModel;
 import java.util.Optional;
 import javax.swing.JOptionPane;
@@ -28,7 +29,7 @@ public class TutorialAction extends AnAction {
   private final @NotNull MainViewModelProvider mainViewModelProvider;
   private final @NotNull TutorialAuthenticationProvider authenticationProvider;
   private final @NotNull Notifier notifier;
-  private final @NotNull Dialogs dialogs;
+  private final @NotNull TutorialDialogs dialogs;
 
   /**
    * Empty Constructor.
@@ -46,7 +47,7 @@ public class TutorialAction extends AnAction {
   public TutorialAction(@NotNull MainViewModelProvider mainViewModelProvider,
                         @NotNull Notifier notifier,
                         @NotNull TutorialAuthenticationProvider authenticationProvider,
-                        @NotNull Dialogs dialogs) {
+                        @NotNull TutorialDialogs dialogs) {
     this.mainViewModelProvider = mainViewModelProvider;
     this.notifier = notifier;
     this.authenticationProvider = authenticationProvider;
@@ -85,9 +86,9 @@ public class TutorialAction extends AnAction {
         .ifPresent(TutorialViewModel::cancelTutorial);
 
     TutorialViewModel tutorialViewModel =
-        new TutorialViewModel(tutorialExercise, new IntelliJActivityFactory(project));
-    mainViewModelProvider.getMainViewModel(project).tutorialViewModel.set(tutorialViewModel);
+        new TutorialViewModel(tutorialExercise, new IntelliJActivityFactory(project), dialogs);
     if (dialogs.confirmStart(tutorialViewModel)) {
+      mainViewModelProvider.getMainViewModel(project).tutorialViewModel.set(tutorialViewModel);
       tutorialViewModel.getTutorial().tutorialCompleted
           .addListener(mainViewModel, this::onTutorialComplete);
       tutorialViewModel.startNextTask();
@@ -117,19 +118,20 @@ public class TutorialAction extends AnAction {
     Authentication getAuthentication(@Nullable Project project);
   }
 
-  public interface Dialogs {
-
-    boolean confirmStart(@NotNull TutorialViewModel tutorialViewModel);
-
-    void end(@NotNull TutorialViewModel tutorialViewModel);
-  }
-
-  private static class DefaultDialogs implements Dialogs {
+  private static class DefaultDialogs implements TutorialDialogs {
 
     @Override
     public boolean confirmStart(@NotNull TutorialViewModel tutorialViewModel) {
       return JOptionPane.showConfirmDialog(null,
         "A tutorial will start.",
+        tutorialViewModel.getTitle(),
+        JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+    }
+
+    @Override
+    public boolean confirmCancel(@NotNull TutorialViewModel tutorialViewModel) {
+      return JOptionPane.showConfirmDialog(null,
+        "Cancel tutorial?",
         tutorialViewModel.getTitle(),
         JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
     }

@@ -11,22 +11,31 @@ import org.jetbrains.annotations.NotNull;
 public class TutorialViewModel {
 
   private final TutorialExercise tutorialExercise;
+  private final TutorialDialogs dialogs;
   private final ActivityFactory activityFactory;
 
   private final Object lock = new Object();
 
   private Task currentTask = null;
 
+  private int currentTaskIndex;
+
+  private final int tasksAmount;
+
   /**
    * Constructor.
    */
   public TutorialViewModel(@NotNull TutorialExercise tutorialExercise,
-                           @NotNull ActivityFactory activityFactory) {
+                           @NotNull ActivityFactory activityFactory,
+                           @NotNull TutorialDialogs dialogs) {
     this.tutorialExercise = tutorialExercise;
+    this.dialogs = dialogs;
     List<Task> tasks = tutorialExercise.getTutorial().getTasks();
     if (!tasks.isEmpty()) {
       this.currentTask = tasks.get(0);
     }
+    currentTaskIndex = 0;
+    tasksAmount = tasks.size();
     this.activityFactory = activityFactory;
   }
 
@@ -36,6 +45,8 @@ public class TutorialViewModel {
   public void startNextTask() {
     synchronized (lock) {
       currentTask.taskCompleted.addListener(this, TutorialViewModel::currentTaskCompleted);
+      currentTask.taskCanceled.addListener(this, TutorialViewModel::confirmCancel);
+      incrementIndex();
       if (currentTask.startTask(activityFactory)) {
         currentTaskCompleted();
       }
@@ -51,15 +62,16 @@ public class TutorialViewModel {
   }
 
   /**
-   * Sets the currentTask as completed and fress up any resources associated with it.
+   * Sets the currentTask as completed and frees up any resources associated with it.
    * If this task was the last one the Tutorial is completed,
    * if not, then the currentTask is set to point to the next Task to be done.
    */
   public void currentTaskCompleted() {
     synchronized (lock) {
-      Tutorial tutorial = tutorialExercise.getTutorial();
       currentTask.endTask();
       currentTask.taskCompleted.removeCallback(this);
+      currentTask.taskCanceled.removeCallback(this);
+      Tutorial tutorial = tutorialExercise.getTutorial();
       currentTask = tutorial.getNextTask(currentTask);
       if (currentTask == null) {
         tutorial.onComplete();
@@ -77,6 +89,7 @@ public class TutorialViewModel {
       if (currentTask != null) {
         currentTask.endTask();
         currentTask.taskCompleted.removeCallback(this);
+        currentTask.taskCanceled.removeCallback(this);
         currentTask = null;
         tutorialExercise.getTutorial().onComplete();
       }
@@ -90,5 +103,23 @@ public class TutorialViewModel {
 
   public @NotNull Tutorial getTutorial() {
     return tutorialExercise.getTutorial();
+  }
+
+  public int getCurrentTaskIndex() {
+    return currentTaskIndex;
+  }
+
+  private void incrementIndex() {
+    currentTaskIndex++;
+  }
+
+  public int getTasksAmount() {
+    return tasksAmount;
+  }
+
+  public void confirmCancel() {
+    if (dialogs.confirmCancel(this)) {
+      cancelTutorial();
+    }
   }
 }

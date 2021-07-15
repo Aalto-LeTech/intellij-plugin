@@ -31,6 +31,10 @@ public class ComponentDatabase {
     return null;
   }
 
+  public static @Nullable Component getProgressButton() {
+    return ComponentLocator.getComponentByClass("TutorialProgressAction");
+  }
+
   private ComponentDatabase() {
 
   }

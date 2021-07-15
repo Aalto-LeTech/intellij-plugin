@@ -7,8 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class Task {
+public class Task implements CancelHandler {
   public final @NotNull Event taskCompleted = new Event();
+  public final @NotNull Event taskCanceled = new Event();
 
   private final @NotNull String instruction;
   private final @NotNull String info;
@@ -66,6 +67,7 @@ public class Task {
       throw new IllegalStateException();
     }
     presenter = activityFactory.createPresenter(component, instruction, info, componentArguments);
+    presenter.setCancelHandler(this);
     listener = activityFactory.createListener(action, actionArguments, taskCompleted::trigger);
     if (listener.registerListener()) {
       return true;
@@ -95,6 +97,11 @@ public class Task {
     return jsonObject == null ? Arguments.empty()
         : JsonUtil.parseObject(jsonObject, JSONObject::get,
             Function.identity(), Function.identity())::get;
+  }
+
+  @Override
+  public void onCancel() {
+    taskCanceled.trigger();
   }
 }
 
