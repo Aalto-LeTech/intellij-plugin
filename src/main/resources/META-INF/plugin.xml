@@ -110,6 +110,15 @@
                         text="Log in"/>
             </group>
         </group>
+        <group id="fi.aalto.cs.apluscourses.intellij.actions.ActionGroups.NAVBAR_ACTIONS"
+               text="A+ Navbar"
+               description="A+ actions for navbar">
+            <add-to-group group-id="NavBarToolBar" anchor="first"/>
+            <action id="fi.aalto.cs.apluscourses.intellij.actions.ProgressAction"
+                    class="fi.aalto.cs.apluscourses.intellij.actions.ProgressAction"
+                    text="Progress"
+                    icon="PluginIcons.A_PLUS_INFO"/>
+        </group>
         <action id="Scala.RunConsole"
                 class="fi.aalto.cs.apluscourses.intellij.actions.ReplAction"
                 overrides="true"

@@ -1,11 +1,13 @@
 package fi.aalto.cs.apluscourses.ui.ideactivities;
 
+import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +19,21 @@ public class ComponentLocator {
 
   public static boolean hasChildOfClass(@NotNull Container c, @NotNull String classSubstring) {
     return !getComponents(c, comp -> isComponentOfClass(comp, classSubstring)).isEmpty();
+  }
+
+  public static boolean hasActionOfClass(@NotNull JButton c, @NotNull String classSubstring) {
+    var action = c.getAction();
+    var actionProperty = c.getClientProperty(CustomComponentAction.ACTION_KEY);
+
+    if (action != null && action.getClass().getName().contains(classSubstring)) {
+      return true;
+    }
+
+    if (actionProperty != null && actionProperty.getClass().getName().contains(classSubstring)) {
+      return true;
+    }
+
+    return false;
   }
 
   @RequiresEdt

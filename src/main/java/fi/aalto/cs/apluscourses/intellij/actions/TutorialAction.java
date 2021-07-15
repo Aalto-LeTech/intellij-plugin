@@ -86,8 +86,8 @@ public class TutorialAction extends AnAction {
 
     TutorialViewModel tutorialViewModel =
         new TutorialViewModel(tutorialExercise, new IntelliJActivityFactory(project));
-    mainViewModelProvider.getMainViewModel(project).tutorialViewModel.set(tutorialViewModel);
     if (dialogs.confirmStart(tutorialViewModel)) {
+      mainViewModelProvider.getMainViewModel(project).tutorialViewModel.set(tutorialViewModel);
       tutorialViewModel.getTutorial().tutorialCompleted
           .addListener(mainViewModel, this::onTutorialComplete);
       tutorialViewModel.startNextTask();
